@@ -6,12 +6,26 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package (MPI REQUIRED)
-find_package (ADIOS2 REQUIRED)
+#find_package (ADIOS2 REQUIRED)
 
 
-add_library (inSituApi SHARED src/inSituApi.cxx)
-set_target_properties (inSituApi PROPERTIES PUBLIC_HEADER src/inSituApi.h)
-target_link_libraries (inSituApi PRIVATE adios2::cxx11_mpi MPI::MPI_C)
+add_library (inSituApi SHARED src/inC2.cxx)
+set_target_properties (inSituApi PROPERTIES PUBLIC_HEADER src/inC2.h)
+target_link_libraries (inSituApi PRIVATE MPI::MPI_C)
+
+add_executable(multiplier examples/multiplier.cxx)
+add_executable(divider examples/divider.cxx)
+add_dependencies(multiplier inSituApi)
+add_dependencies(divider inSituApi)
+target_include_directories(multiplier PUBLIC src/)
+target_include_directories(divider PUBLIC src/)
+target_link_libraries (multiplier inSituApi)
+target_link_libraries (divider inSituApi)
+
+add_executable (c_example examples/c_example.cxx)
+add_dependencies(c_example inSituApi)
+target_include_directories(c_example PUBLIC src/)
+target_link_libraries(c_example inSituApi)
 
 install (TARGETS inSituApi 
          LIBRARY DESTINATION lib
