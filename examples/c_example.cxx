@@ -7,8 +7,8 @@
 int main()
 {
    InC2 *parent = new InC2();
-   ChildProc *mult_child = parent->spawnMPIChild("multiplier 5");
-   ChildProc *div_child =  parent->spawnMPIChild("divider 3");
+   ChildProg *mult_child = parent->spawnMPIChild("multiplier 5");
+   ChildProg *div_child =  parent->spawnMPIChild("divider 3");
 
    int val = 2;
    std::cout << "Starting with a value of " << val  << std::endl;

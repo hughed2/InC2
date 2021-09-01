@@ -35,5 +35,5 @@ class Adiosapi(CMakePackage):
 
 
     depends_on('mpi')
-    depends_on('adios2~shared')
+    depends_on('py-pybind11')
 
