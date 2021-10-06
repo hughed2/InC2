@@ -25,7 +25,7 @@ import os
 from spack import *
 
 
-class Adiosapi(CMakePackage):
+class InC2(CMakePackage):
     """ hpMusic Flow Solver """
 
     # We have a tarball in the package directory--find and use it
