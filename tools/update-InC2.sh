@@ -14,16 +14,16 @@ if [ ! -d "$SPACK_ROOT/var/spack/repos/hpmusic" ]; then
 fi
 
 # Now make sure our package exists
-if [ ! -d "$SPACK_ROOT/var/spack/repos/hpmusic/packages/inc2" ]; then
-  spack create --skip-editor --repo $SPACK_ROOT/var/spack/repos/hpmusic --name inc2
+if [ ! -d "$SPACK_ROOT/var/spack/repos/hpmusic/packages/inc" ]; then
+  spack create --skip-editor --repo $SPACK_ROOT/var/spack/repos/hpmusic --name inc
 fi
 
 # Move our tarball over
-rm -f inc2.tar.gz
-tar -czf inc2.tar.gz *
-mv inc2.tar.gz $SPACK_ROOT/var/spack/repos/hpmusic/packages/inc2/
+rm -f inc.tar.gz
+tar -czf inc.tar.gz *
+mv inc.tar.gz $SPACK_ROOT/var/spack/repos/hpmusic/packages/inc/
 
 # Make sure package.py is updated
-cp tools/package.py.TEMPLATE $SPACK_ROOT/var/spack/repos/hpmusic/packages/inc2/package.py
-tarhash=`md5sum $SPACK_ROOT/var/spack/repos/hpmusic/packages/inc2/inc2.tar.gz | awk '{print $1}'`
-sed -i'.TEMPLATE' -e "s/<VERSION>/$tarhash/g" $SPACK_ROOT/var/spack/repos/hpmusic/packages/inc2/package.py
+cp tools/package.py.TEMPLATE $SPACK_ROOT/var/spack/repos/hpmusic/packages/inc/package.py
+tarhash=`md5sum $SPACK_ROOT/var/spack/repos/hpmusic/packages/inc/inc.tar.gz | awk '{print $1}'`
+sed -i'.TEMPLATE' -e "s/<VERSION>/$tarhash/g" $SPACK_ROOT/var/spack/repos/hpmusic/packages/inc/package.py

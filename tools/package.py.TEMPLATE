@@ -25,11 +25,11 @@ import os
 from spack import *
 
 
-class Inc2(CMakePackage):
+class Inc(CMakePackage):
     """ hpMusic Flow Solver """
 
     # We have a tarball in the package directory--find and use it
-    url = "file://%s/inc2.tar.gz" % os.path.dirname(os.path.realpath(__file__))
+    url = "file://%s/inc.tar.gz" % os.path.dirname(os.path.realpath(__file__))
 
     version('1.0.0', '<VERSION>')
 
