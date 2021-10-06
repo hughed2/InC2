@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package (MPI REQUIRED)
 
 add_library (inSituApi SHARED src/message.cxx src/inC2.cxx src/childProg.cxx )
-#set_target_properties (inSituApi PROPERTIES PUBLIC_HEADER src/inC2.h)
+set_target_properties (inSituApi PROPERTIES PUBLIC_HEADER "src/message.h;src/inC2.h;src/childProg.h")
 target_link_libraries (inSituApi PRIVATE MPI::MPI_C)
 
 add_executable(multiplier examples/multiplier.cxx)
@@ -29,6 +29,6 @@ find_package (pybind11 CONFIG)
 pybind11_add_module(InC2 bindings/python/PyInC2.cxx bindings/python/PyChildProg.cxx bindings/python/PyMessage.cxx)
 target_link_libraries(InC2 PRIVATE inSituApi MPI::MPI_C)
 
-install (TARGETS inSituApi 
+install (TARGETS inSituApi InC2
          LIBRARY DESTINATION lib
          PUBLIC_HEADER DESTINATION include)

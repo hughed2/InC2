@@ -1,4 +1,5 @@
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "../../src/childProg.h"
 
@@ -13,6 +14,8 @@ void childProg_module(py::module &m)
        .def("stop", &ChildProg::stop)
        .def("report", &ChildProg::report)
        .def("input", &ChildProg::input)
+       .def("receiveDoubles", &ChildProg::receiveDoubles)
+       .def("receiveInts", &ChildProg::receiveInts)
    ;
 }
 

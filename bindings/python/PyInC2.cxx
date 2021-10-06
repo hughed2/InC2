@@ -14,6 +14,8 @@ PYBIND11_MODULE(InC2, m)
        .def("spawnMPIChild", &InC2::spawnMPIChild)
        .def("sendParentMessage", &InC2::sendParentMessage)
        .def("receiveParentMessage", &InC2::receiveParentMessage)
+       .def("sendDoubles", &InC2::sendDoubles)
+       .def("sendInts", &InC2::sendInts)
    ;
 
   childProg_module(m);

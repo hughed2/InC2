@@ -4,20 +4,13 @@
 #include <cstring>
 #include <iostream>
 
-ChildProg::ChildProg(std::string command, bool MPI)
+ChildProg::ChildProg(std::string command, int procs)
 {
-   if(MPI)
-   {
-      _MPIChild(command);
-   }
-   else
-   {
-      std::cerr << "Only MPI children are implemented for now. Note that a child that uses the InC2 class counts as an MPI child." << std::endl;
-   }
+   _MPIChild(command, procs);
 }
 
 void
-ChildProg::_MPIChild(std::string command)
+ChildProg::_MPIChild(std::string command, int procs)
 {
    // MPI is a C lib, so we need to convert our C++ string
    size_t n = std::count(command.begin(), command.end(), ' ');
@@ -31,14 +24,14 @@ ChildProg::_MPIChild(std::string command)
    }
    argv[n] = NULL; // MPI's list of args is null terminated
 
-   MPI_Comm_spawn(cmd_c, argv, 1, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &child_comm, MPI_ERRCODES_IGNORE);
+   MPI_Comm_spawn(cmd_c, argv, procs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &child_comm, MPI_ERRCODES_IGNORE);
 
    free(argv);
    free(cmd_c);
 
 }
 
-void ChildProg::sendMessage(Message msg, int rank=0)
+void ChildProg::sendMessage(Message msg, int rank)
 {
    std::string text = msg.getText();
    int msgSize = text.size();
@@ -46,7 +39,7 @@ void ChildProg::sendMessage(Message msg, int rank=0)
    MPI_Send(text.c_str(), msgSize, MPI_CHAR, rank, 0, child_comm);
 }
 
-Message ChildProg::receiveMessage(int rank=0)
+Message ChildProg::receiveMessage(int rank)
 {
    int msgSize;
    MPI_Recv(&msgSize, 1, MPI_INT, rank, 0, child_comm, MPI_STATUS_IGNORE);
@@ -72,4 +65,38 @@ void ChildProg::input(std::string payload)
    this->sendMessage(Message("INPUT", payload));
 }
 
+std::vector<double> ChildProg::receiveDoubles(int rank)
+{
+   int size;
+   MPI_Request req;
+   //MPI_Recv(&size, 1, MPI_INT, rank, 0, child_comm, MPI_STATUS_IGNORE);
+   MPI_Irecv(&size, 1, MPI_INT, rank, 0, child_comm, &req);
+   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   double* data = (double *) malloc((size) * sizeof(double));
+   //MPI_Recv(data, size, MPI_DOUBLE, rank, 0, child_comm, MPI_STATUS_IGNORE);
+   MPI_Irecv(data, size, MPI_DOUBLE, rank, 0, child_comm, &req);
+   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   std::vector<double> data_vec(data, data+size);
+   return data_vec;
+}
+
+//std::vector<double> ChildProg::receiveDoublesFromAll()
+//{
+//   int size;
+//}
+
+std::vector<int> ChildProg::receiveInts(int rank)
+{  
+   int size;
+   MPI_Request req;
+   //MPI_Recv(&size, 1, MPI_INT, rank, 0, child_comm, MPI_STATUS_IGNORE);
+   MPI_Irecv(&size, 1, MPI_INT, rank, 0, child_comm, &req);
+   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   int* data = (int *) malloc((size) * sizeof(int));
+   //MPI_Recv(data, size, MPI_INT, rank, 0, child_comm, MPI_STATUS_IGNORE);
+   MPI_Irecv(data, size, MPI_INT, rank, 0, child_comm, &req);
+   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   std::vector<int> data_vec(data, data+size);
+   return data_vec; 
+}  
 

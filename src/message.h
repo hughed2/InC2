@@ -16,7 +16,10 @@ class Message
       std::string getPayload();
 
    private:
-      std::string txt, command, payload;
+      std::string txt;
+      std::string command;
+      std::string payload; // optional depending on command type, JSON
+
       bool isValidCommand(std::string);
 };
 

@@ -4,7 +4,6 @@
 
 InC2::InC2()
 {
-   int initialized = 0;
    MPI_Initialized(&initialized);
    if(!initialized)
    {
@@ -16,16 +15,16 @@ InC2::~InC2()
 {
    int finalized = 0;
    MPI_Finalized(&finalized);
-   if(!finalized)
+   if(!initialized && !finalized) // only MPI Finalize if this is the object that initialized in the first place
    {
       MPI_Finalize();
    }
 }
 
 ChildProg* 
-InC2::spawnMPIChild(std::string command)
+InC2::spawnMPIChild(std::string command, int procs)
 {
-   return new ChildProg(command);
+   return new ChildProg(command, procs);
 }
 
 void
@@ -51,5 +50,39 @@ InC2::receiveParentMessage()
    MPI_Recv(msg, msgSize, MPI_CHAR, 0, 0, parent_comm, MPI_STATUS_IGNORE);
    msg[msgSize] = '\0';
    return Message(std::string(msg));
+}
+
+void
+InC2::sendDoubles(double* data, int size)
+{
+   MPI_Comm parent_comm = MPI_COMM_SELF;
+   MPI_Request req;
+   MPI_Status stat;
+   MPI_Comm_get_parent(&parent_comm);
+   //MPI_Send(&size, 1, MPI_INT, 0, 0, parent_comm);
+   MPI_Isend(&size, 1, MPI_INT, 0, 0, parent_comm, &req);
+   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   //MPI_Request_free(&req);
+   //MPI_Send(data, size, MPI_DOUBLE, 0, 0, parent_comm);
+   MPI_Isend(data, size, MPI_DOUBLE, 0, 0, parent_comm, &req);
+   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   //MPI_Request_free(&req);
+}
+
+void
+InC2::sendInts(int* data, int size)
+{
+   MPI_Comm parent_comm = MPI_COMM_SELF;
+   MPI_Request req;
+   MPI_Status stat;
+   MPI_Comm_get_parent(&parent_comm);
+   //MPI_Send(&size, 1, MPI_INT, 0, 0, parent_comm);
+   MPI_Isend(&size, 1, MPI_INT, 0, 0, parent_comm, &req);
+   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   //MPI_Request_free(&req);
+   //MPI_Send(data, size, MPI_INT, 0, 0, parent_comm);
+   MPI_Isend(data, size, MPI_INT, 0, 0, parent_comm, &req);
+   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   //MPI_Request_free(&req);
 }
 
