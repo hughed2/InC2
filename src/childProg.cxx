@@ -65,38 +65,87 @@ void ChildProg::input(std::string payload)
    this->sendMessage(Message("INPUT", payload));
 }
 
-std::vector<double> ChildProg::receiveDoubles(int rank)
+int
+ChildProg::_getSize(int rank)
 {
    int size;
+   MPI_Status status;
+   MPI_Probe(rank, 0, child_comm, &status);
+   MPI_Get_count(&status, MPI_INT, &size);
+   return size;
+}
+
+void
+ChildProg::_getData(void* data, int size, MPI_Datatype datatype, int rank)
+{
    MPI_Request req;
-   //MPI_Recv(&size, 1, MPI_INT, rank, 0, child_comm, MPI_STATUS_IGNORE);
-   MPI_Irecv(&size, 1, MPI_INT, rank, 0, child_comm, &req);
+   MPI_Irecv(data, size, datatype, rank, 0, child_comm, &req);
    MPI_Wait(&req, MPI_STATUS_IGNORE);
+}
+
+std::vector<double>
+ChildProg::receiveDoubles(int rank)
+{
+   int size = this->_getSize(rank);
    double* data = (double *) malloc((size) * sizeof(double));
-   //MPI_Recv(data, size, MPI_DOUBLE, rank, 0, child_comm, MPI_STATUS_IGNORE);
-   MPI_Irecv(data, size, MPI_DOUBLE, rank, 0, child_comm, &req);
-   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   this->_getData(data, size, MPI_DOUBLE, rank);
    std::vector<double> data_vec(data, data+size);
    return data_vec;
 }
 
-//std::vector<double> ChildProg::receiveDoublesFromAll()
-//{
-//   int size;
-//}
+std::vector<double>
+ChildProg::receiveDoublesFromAll()
+{
+   int* sizes = (int *) malloc((this->ranks) * sizeof(int));
+   int totalSize = 0;
+   for(int i = 0; i < this->ranks; i++)
+   {
+      sizes[i] = this->_getSize(i);
+      totalSize += sizes[i];
+   }
 
-std::vector<int> ChildProg::receiveInts(int rank)
-{  
-   int size;
-   MPI_Request req;
-   //MPI_Recv(&size, 1, MPI_INT, rank, 0, child_comm, MPI_STATUS_IGNORE);
-   MPI_Irecv(&size, 1, MPI_INT, rank, 0, child_comm, &req);
-   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   double* data = (double *) malloc((totalSize) * sizeof(double));
+   double* dataCur = data;
+   for(int i = 0; i < this->ranks; i++)
+   {
+      this->_getData(dataCur, sizes[i], MPI_DOUBLE, i);
+      dataCur += sizes[i];
+   }
+
+   std::vector<double> data_vec(data, data+totalSize);
+   return data_vec;
+}
+
+std::vector<int>
+ChildProg::receiveInts(int rank)
+{ 
+   int size = this->_getSize(rank);
    int* data = (int *) malloc((size) * sizeof(int));
-   //MPI_Recv(data, size, MPI_INT, rank, 0, child_comm, MPI_STATUS_IGNORE);
-   MPI_Irecv(data, size, MPI_INT, rank, 0, child_comm, &req);
-   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   this->_getData(data, size, MPI_INT, rank);
    std::vector<int> data_vec(data, data+size);
    return data_vec; 
-}  
+}
+
+std::vector<int>
+ChildProg::receiveIntsFromAll()
+{
+   int* sizes = (int *) malloc((this->ranks) * sizeof(int));
+   int totalSize = 0;
+   for(int i = 0; i < this->ranks; i++)
+   {
+      sizes[i] = this->_getSize(i);
+      totalSize += sizes[i];
+   }  
+
+   int* data = (int *) malloc((totalSize) * sizeof(int));
+   int* dataCur = data;
+   for(int i = 0; i < this->ranks; i++)
+   {
+      this->_getData(dataCur, sizes[i], MPI_INT, i);
+      dataCur += sizes[i];
+   }
+
+   std::vector<int> data_vec(data, data+totalSize);
+   return data_vec;
+}
 

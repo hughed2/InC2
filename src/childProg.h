@@ -15,9 +15,12 @@ class ChildProg
       Message receiveMessage(int = 0);
 
       std::vector<double> receiveDoubles(int = 0);
-      //std::vector<double> receiveDoublesFromAll();
+      std::vector<double> receiveDoublesFromAll();
       std::vector<int> receiveInts(int = 0);
-      //std::vector<int> receiveIntsFromAll();
+      std::vector<int> receiveIntsFromAll();
+
+      int _getSize(int);
+      void _getData(void*, int, MPI_Datatype, int);
 
       // These are just convenience wrappers to sendMessage
       void stop();

@@ -16,6 +16,7 @@ PYBIND11_MODULE(InC2, m)
        .def("receiveParentMessage", &InC2::receiveParentMessage)
        .def("sendDoubles", &InC2::sendDoubles)
        .def("sendInts", &InC2::sendInts)
+       .def("waitForAsync", &InC2::waitForAsync)
    ;
 
   childProg_module(m);

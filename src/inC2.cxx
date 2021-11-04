@@ -53,36 +53,32 @@ InC2::receiveParentMessage()
 }
 
 void
-InC2::sendDoubles(double* data, int size)
+InC2::_send(void* data, MPI_Datatype datatype, int size)
 {
    MPI_Comm parent_comm = MPI_COMM_SELF;
    MPI_Request req;
-   MPI_Status stat;
    MPI_Comm_get_parent(&parent_comm);
-   //MPI_Send(&size, 1, MPI_INT, 0, 0, parent_comm);
-   MPI_Isend(&size, 1, MPI_INT, 0, 0, parent_comm, &req);
-   MPI_Wait(&req, MPI_STATUS_IGNORE);
-   //MPI_Request_free(&req);
-   //MPI_Send(data, size, MPI_DOUBLE, 0, 0, parent_comm);
-   MPI_Isend(data, size, MPI_DOUBLE, 0, 0, parent_comm, &req);
-   MPI_Wait(&req, MPI_STATUS_IGNORE);
-   //MPI_Request_free(&req);
+   MPI_Isend(data, size, datatype, 0, 0, parent_comm, &req);
+   req_list.push_back(&req);
+}
+
+void
+InC2::sendDoubles(double* data, int size)
+{
+   this->_send(data, MPI_DOUBLE, size);
 }
 
 void
 InC2::sendInts(int* data, int size)
 {
-   MPI_Comm parent_comm = MPI_COMM_SELF;
-   MPI_Request req;
-   MPI_Status stat;
-   MPI_Comm_get_parent(&parent_comm);
-   //MPI_Send(&size, 1, MPI_INT, 0, 0, parent_comm);
-   MPI_Isend(&size, 1, MPI_INT, 0, 0, parent_comm, &req);
-   MPI_Wait(&req, MPI_STATUS_IGNORE);
-   //MPI_Request_free(&req);
-   //MPI_Send(data, size, MPI_INT, 0, 0, parent_comm);
-   MPI_Isend(data, size, MPI_INT, 0, 0, parent_comm, &req);
-   MPI_Wait(&req, MPI_STATUS_IGNORE);
-   //MPI_Request_free(&req);
+   this->_send(data, MPI_INT, size);
 }
 
+void
+InC2::waitForAsync()
+{
+   for (auto itr = begin(req_list); itr != end(req_list); itr++)
+   {
+      MPI_Wait(*itr, MPI_STATUS_IGNORE);
+   }
+}

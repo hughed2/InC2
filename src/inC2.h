@@ -4,6 +4,9 @@
 #include "childProg.h"
 #include "message.h"
 
+#include <mpi.h>
+#include <vector>
+
 class InC2
 {
    public:
@@ -16,6 +19,9 @@ class InC2
 
       void sendDoubles(double*, int);
       void sendInts(int*, int);
+      void waitForAsync();
+
+      void _send(void*, MPI_Datatype, int);
 
    private:
       int initialized = -1;
@@ -23,6 +29,8 @@ class InC2
       std::string jobId;
       std::string parentJobId = "NULL";
       int proc;
+
+      std::vector<MPI_Request*> req_list;
 };
 
 #endif

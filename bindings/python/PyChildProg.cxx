@@ -15,7 +15,9 @@ void childProg_module(py::module &m)
        .def("report", &ChildProg::report)
        .def("input", &ChildProg::input)
        .def("receiveDoubles", &ChildProg::receiveDoubles)
+       .def("receiveDoublesFromAll", &ChildProg::receiveDoublesFromAll)
        .def("receiveInts", &ChildProg::receiveInts)
+       .def("receiveIntsFromAll", &ChildProg::receiveIntsFromAll)
    ;
 }
 
