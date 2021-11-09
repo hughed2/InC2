@@ -29,6 +29,7 @@ ChildProg::_MPIChild(std::string command, int procs)
    free(argv);
    free(cmd_c);
 
+   this->ranks = procs;
 }
 
 void ChildProg::sendMessage(Message msg, int rank)
@@ -86,7 +87,7 @@ ChildProg::_getData(void* data, int size, MPI_Datatype datatype, int rank)
 std::vector<double>
 ChildProg::receiveDoubles(int rank)
 {
-   int size = this->_getSize(rank);
+   int size = this->_getSize(rank) / 2; // _getSize doesn't adjust for the fact that a double is twice the size of an int, so we do it here
    double* data = (double *) malloc((size) * sizeof(double));
    this->_getData(data, size, MPI_DOUBLE, rank);
    std::vector<double> data_vec(data, data+size);
@@ -100,7 +101,7 @@ ChildProg::receiveDoublesFromAll()
    int totalSize = 0;
    for(int i = 0; i < this->ranks; i++)
    {
-      sizes[i] = this->_getSize(i);
+      sizes[i] = this->_getSize(i) / 2; // _getSize doesn't adjust for the fact that a double is twice the size of an int, so we do it here
       totalSize += sizes[i];
    }
 
