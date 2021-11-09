@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.12)
 project (INSITUAPI)
 
 #set(CMAKE_BUILD_TYPE Release)
@@ -29,6 +29,10 @@ find_package (pybind11 CONFIG)
 pybind11_add_module(InC2 bindings/python/PyInC2.cxx bindings/python/PyChildProg.cxx bindings/python/PyMessage.cxx)
 target_link_libraries(InC2 PRIVATE inSituApi MPI::MPI_C)
 
-install (TARGETS inSituApi InC2
+find_package(Python)
+
+install (TARGETS inSituApi 
          LIBRARY DESTINATION lib
          PUBLIC_HEADER DESTINATION include)
+install (TARGETS InC2
+         LIBRARY DESTINATION lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages)

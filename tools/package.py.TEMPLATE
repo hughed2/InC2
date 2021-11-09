@@ -25,7 +25,7 @@ import os
 from spack import *
 
 
-class Inc(CMakePackage):
+class Inc(CMakePackage, PythonPackage):
     """ hpMusic Flow Solver """
 
     # We have a tarball in the package directory--find and use it
@@ -36,4 +36,4 @@ class Inc(CMakePackage):
 
     depends_on('mpi')
     depends_on('py-pybind11')
-
+    depends_on('cmake@3.12:')
