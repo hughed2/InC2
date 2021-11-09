@@ -59,7 +59,7 @@ InC2::_send(void* data, MPI_Datatype datatype, int size)
    MPI_Request req;
    MPI_Comm_get_parent(&parent_comm);
    MPI_Isend(data, size, datatype, 0, 0, parent_comm, &req);
-   req_list.push_back(&req);
+   req_list.push_back(req);
 }
 
 void
@@ -77,8 +77,7 @@ InC2::sendInts(int* data, int size)
 void
 InC2::waitForAsync()
 {
-   for (auto itr = begin(req_list); itr != end(req_list); itr++)
-   {
-      MPI_Wait(*itr, MPI_STATUS_IGNORE);
-   }
+   MPI_Status *statuses = (MPI_Status *) malloc(req_list.size() * sizeof(MPI_Status));
+   MPI_Waitall(req_list.size(), req_list.data(), statuses);
+   req_list.clear(); // We've gone through the iterations, we don't need this anymore
 }

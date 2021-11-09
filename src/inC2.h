@@ -30,7 +30,7 @@ class InC2
       std::string parentJobId = "NULL";
       int proc;
 
-      std::vector<MPI_Request*> req_list;
+      std::vector<MPI_Request> req_list;
 };
 
 #endif
