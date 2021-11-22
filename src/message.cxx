@@ -26,6 +26,7 @@ Message::Message(std::string text)
 
 }
 
+// Given a valid command (see above list) and payload string, turn it into the JSON form of a message object
 Message::Message(std::string command, std::string payload)
 {
    if(!isValidCommand(command))
@@ -38,6 +39,8 @@ Message::Message(std::string command, std::string payload)
    this->txt = std::string("{\n   \"command\": \"") + command + std::string("\",\n") +
                   std::string("   \"payload\": \"") + payload + std::string("\"\n}");
 }
+
+// Check to make sure that an input string is in the list of valid commands
 bool
 Message::isValidCommand(std::string command)
 {
@@ -53,18 +56,21 @@ Message::isValidCommand(std::string command)
    return false;
 }
 
+// Get the entire JSON string
 std::string
 Message::getText()
 {
    return this->txt;
 }
 
+// Get just the command value
 std::string
 Message::getCommand()
 {
    return this->command;
 }
 
+// Get just the payload value
 std::string
 Message::getPayload()
 {
