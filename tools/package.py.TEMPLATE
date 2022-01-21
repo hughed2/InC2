@@ -35,5 +35,5 @@ class Inc(CMakePackage, PythonPackage):
 
 
     depends_on('mpi')
-    depends_on('py-pybind11')
+    #depends_on('py-pybind11')
     depends_on('cmake@3.12:')

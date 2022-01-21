@@ -7,9 +7,9 @@ namespace py=pybind11;
 void childProg_module(py::module &);
 void message_module(py::module &);
 
-PYBIND11_MODULE(InC2, m)
+PYBIND11_MODULE(PyInC2, m)
 {
-   py::class_<InC2>(m, "InC2")
+   py::class_<InC2>(m, "PyInC2")
        .def(py::init<>())
        .def("spawnMPIChild", &InC2::spawnMPIChild)
        .def("sendParentMessage", &InC2::sendParentMessage)

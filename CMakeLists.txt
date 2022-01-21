@@ -4,10 +4,11 @@ project (INSITUAPI)
 #set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON) # sets -fPIC command line options for gcc
 
 find_package (MPI REQUIRED)
 
-add_library (InC2 SHARED src/message.cxx src/inC2.cxx src/childProg.cxx )
+add_library (InC2 STATIC src/message.cxx src/inC2.cxx src/childProg.cxx )
 set_target_properties (InC2 PROPERTIES PUBLIC_HEADER "src/message.h;src/inC2.h;src/childProg.h")
 target_link_libraries (InC2 PRIVATE MPI::MPI_C)
 
@@ -25,7 +26,10 @@ add_dependencies(c_example InC2)
 target_include_directories(c_example PUBLIC src/)
 target_link_libraries(c_example InC2 MPI::MPI_C)
 
-find_package (pybind11 CONFIG)
+# When building with spack, sometimes the automatically set PYTHONHOME will cause a problem
+unset (ENV{PYTHONHOME})
+
+add_subdirectory (contrib/pybind11)
 pybind11_add_module(PyInC2 bindings/python/PyInC2.cxx bindings/python/PyChildProg.cxx bindings/python/PyMessage.cxx)
 target_link_libraries(PyInC2 PRIVATE InC2 MPI::MPI_C)
 
@@ -33,6 +37,7 @@ find_package(Python)
 
 install (TARGETS InC2 
          LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib
          PUBLIC_HEADER DESTINATION include)
 install (TARGETS PyInC2
          LIBRARY DESTINATION lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages)
