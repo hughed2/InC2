@@ -1,5 +1,7 @@
 #include "inC2.h"
 
+#include <algorithm>
+#include <cstring>
 #include <mpi.h>
 
 InC2::InC2()
@@ -7,8 +9,8 @@ InC2::InC2()
    // Because we use MPI, we need to have an MPI_Init() ahead of time
    // We want to handle it if the user hasn't, but if they have we shouldn't
    // do it a second time
-   MPI_Initialized(&initialized);
-   if(!initialized)
+   MPI_Initialized(&(this->mpi_initialized));
+   if(!(this->mpi_initialized))
    {
       MPI_Init(NULL, NULL);
    }
@@ -19,92 +21,48 @@ InC2::~InC2()
    // If we did an MPI_Init in the constructor, we should MPI_Finalize as well
    int finalized = 0;
    MPI_Finalized(&finalized);
-   if(!initialized && !finalized)
+   if(!(this->mpi_initialized) && !finalized)
    {
       MPI_Finalize();
    }
 }
 
-// This is a wrapper around the ChildProg constructor to create a set of children using MPI
-// Because ChildProg ONLY creates children via MPI at the moment, this is a very thin wrapper
-// but might change. Please review ChildProg::ChildProg() for up to date info on what these arguments are
-ChildProg* 
-InC2::spawnMPIChild(std::string command, int procs)
+// Create a set of child processes. We pass in the command and the number of processes
+// The command is executed as if it were on the command line. For example, if I run
+// a job "hoMusic proj.in" on the command line, but I want it to have 20 procs, I could run
+// ChildProg("hoMusic proj.in", 20)
+InC2Comm* 
+InC2::spawnChild(std::string command, int procs)
 {
-   return new ChildProg(command, procs);
+   // MPI is a C lib, so we need to convert our C++ string
+   size_t n = std::count(command.begin(), command.end(), ' ');
+   char* cmd_c = (char*) malloc((1+command.size()) * sizeof(char)); // Add one for terminal \0
+   strcpy(cmd_c, command.c_str());
+   char** argv = (char**) malloc((1+n) * sizeof(char*));
+
+   char* exe = strtok(cmd_c, " "); // This mangles cmd_c and uses already allocated memory, so don't need to free
+   for(int i = 0; i < n; i++) {
+      argv[i] = strtok(NULL, " ");
+   }
+   argv[n] = NULL; // MPI's list of args is null terminated
+
+   MPI_Comm child_comm;
+   MPI_Comm_spawn(cmd_c, argv, procs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &child_comm, MPI_ERRCODES_IGNORE);
+
+   free(argv);
+   free(cmd_c);
+
+   return new InC2Comm(child_comm);
 }
 
-// This sends a report to an MPI parent process (typically a controller script).
-// It only takes in a string, but then wraps it in a Message object
-void
-InC2::sendParentMessage(std::string report)
+// This communicator will only speak with the job's parent.
+// If you have an InC2 runner script, then after you use spawnChild() you'll want the
+// child apps to each use getParent() to communicate with the runner script.
+InC2Comm*
+InC2::getParent()
 {
-   report = Message("REPORT", report).getText();
-   int msgSize = report.size();
-
    MPI_Comm parent_comm;
    MPI_Comm_get_parent(&parent_comm);
-   MPI_Send(&msgSize, 1, MPI_INT, 0, 0, parent_comm); // send the size first so the recipient knows how big the file is
-   MPI_Send(report.c_str(), msgSize, MPI_CHAR, 0, 0, parent_comm);
-}
 
-// Receive a Message back from a parent.
-// This is blocking, but there'll soon be probe functionality to better check for messages
-Message
-InC2::receiveParentMessage()
-{
-   MPI_Comm parent_comm;
-   MPI_Comm_get_parent(&parent_comm);
-   int msgSize;
-   MPI_Recv(&msgSize, 1, MPI_INT, 0, 0, parent_comm, MPI_STATUS_IGNORE); // we need to get the size first for our MPI_Recv
-   char* msg = (char *) malloc((1+msgSize) * sizeof(char));
-   MPI_Recv(msg, msgSize, MPI_CHAR, 0, 0, parent_comm, MPI_STATUS_IGNORE);
-   msg[msgSize] = '\0';
-   return Message(std::string(msg));
-}
-
-
-// This is a wrapper around Isend to simplify the interface.
-// This should be used internally only.
-void
-InC2::_send(void* data, MPI_Datatype datatype, int size)
-{
-   MPI_Comm parent_comm = MPI_COMM_SELF;
-   MPI_Request req;
-   MPI_Comm_get_parent(&parent_comm);
-   MPI_Isend(data, size, datatype, 0, 0, parent_comm, &req);
-   req_list.push_back(req);
-}
-
-// Send an array of doubles to our parent. This is non-blocking.
-// To complete the send, we eventually need to call waitForAsync().
-// One waitForAsync() call is enough for multiple sendDoubles() or sendInts()
-//
-// Note that we have to manually supply the size of the array
-void
-InC2::sendDoubles(double* data, int size)
-{
-   this->_send(data, MPI_DOUBLE, size);
-}
-
-// Send an array of ints to our parent. This is non-blocking.
-// To complete the send, we eventually need to call waitForAsync().
-// One waitForAsync() call is enough for multiple sendDoubles() or sendInts()
-//
-// Note that we have to manually supply the size of the array
-void
-InC2::sendInts(int* data, int size)
-{
-   this->_send(data, MPI_INT, size);
-}
-
-// This is a synchronous call that waits for all pending send requests to finish and
-// frees up their buffers. You MUST eventually call this after a sendDoubles()
-// or sendInts() or that memory will be permanently allocated and lost. 
-void
-InC2::waitForAsync()
-{
-   MPI_Status *statuses = (MPI_Status *) malloc(req_list.size() * sizeof(MPI_Status));
-   MPI_Waitall(req_list.size(), req_list.data(), statuses);
-   req_list.clear(); // We've gone through the iterations, we don't need this anymore
+   return new InC2Comm(parent_comm);
 }
