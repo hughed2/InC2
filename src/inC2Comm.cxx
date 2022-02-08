@@ -22,15 +22,22 @@ InC2Comm::sendMessage(Message msg, int rank)
 // Check to see if there's a message from our communicator, and return if so.
 // Otherwise, return void.
 // Note that this is blocking
-Message
+Message*
 InC2Comm::checkForMessage(int rank)
 {
-   int msgSize;
-   MPI_Recv(&msgSize, 1, MPI_INT, rank, 0, this->mpi_comm, MPI_STATUS_IGNORE);
-   char* msg = (char *) malloc((1+msgSize) * sizeof(char));
-   MPI_Recv(msg, msgSize, MPI_CHAR, rank, 0, this->mpi_comm, MPI_STATUS_IGNORE);
-   msg[msgSize] = '\0';
-   return Message(std::string(msg));
+   int flag;
+   MPI_Status status;
+   MPI_Iprobe(rank, 0, this->mpi_comm, &flag, &status); // non-blocking check to see if we have a message
+   Message* retVal = NULL;
+   if(flag){
+      int msgSize;
+      MPI_Recv(&msgSize, 1, MPI_INT, rank, 0, this->mpi_comm, MPI_STATUS_IGNORE);
+      char* msg = (char *) malloc((1+msgSize) * sizeof(char));
+      MPI_Recv(msg, msgSize, MPI_CHAR, rank, 0, this->mpi_comm, MPI_STATUS_IGNORE);
+      msg[msgSize] = '\0';
+      retVal = new Message(std::string(msg));
+   }
+   return NULL;
 }
 
 // This is a wrapper around Isend to simplify the interface.

@@ -17,13 +17,49 @@ Message::Message(std::string command)
 {
    if(!_isValidCommand(command))
    {
-      std::cerr << "Invalid command: " << command << std::endl;
+      std::cerr << "Error creating Message, invalid command: " << command << std::endl;
       return;
    }
 
    // Set up our basic structure, but don't worry about filling in any parameters yet
    this->j["command"] = command;
    this->j["metadata"] = json::object();
+}
+
+// Given a json object, initialize our message
+Message::Message(json jsonObj)
+{
+   // We need to have a valid command
+   this->j = jsonObj;
+   if(!this->j.contains("command"))
+   {
+      std::cerr << "Error creating Message, no command included in json object" << std::endl;
+   }
+
+   std::string command = this->j["command"].get<std::string>();
+   if(!_isValidCommand(command))
+   {
+      std::cerr << "Error creating Message, invalid command: " << command << std::endl;
+   }
+
+   // Make sure we always have metadata--but because it can be an empty object, it's okay if the user didn't supply it
+   if(!this->j.contains("metadata"))
+   {
+      this->j["metadata"] = json::object();
+   }
+
+   // Make sure we don't have any extra objects
+   if(!this->j.size() == 2)
+   {
+      std::cerr << "Error creating Message, invalid keys contained in json object" << std::endl;
+   }
+}
+
+Message
+stringToMessage(std::string jsonString)
+{
+   json j = json::parse(jsonString);
+   return Message(j);
 }
 
 // Check to make sure that an input string is in the list of valid commands
@@ -103,3 +139,4 @@ Message::getStringParameter(std::string key)
 {
    return this->j["metadata"][key].get<std::string>();
 }
+

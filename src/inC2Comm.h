@@ -14,7 +14,7 @@ class InC2Comm
 
       // Send or receive a Message object from a process
       void sendMessage(Message msg, int rank = 0);
-      Message checkForMessage(int rank = 0);
+      Message* checkForMessage(int rank = 0);
 
       // Pass data along to either a specific rank, or to all processes within the communicator
       void sendDoubles(std::vector<double> &data, int rank = 0);

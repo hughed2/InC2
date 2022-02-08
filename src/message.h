@@ -8,14 +8,14 @@ using nlohmann::json;
 
 extern std::string commandList[];
 
-// A Message class is a simple JSON string that looks like the following:
+// A Message class is a wrapper around a JSON object that looks like the following:
 // {
 //    "command" : "<command>",
-//    "payload" : "<payload>"
+//    "metadata" : "<payload>"
 // }
 //
 // where <command> is any of "STOP", "RESTART", "RECONFIGURE", "REPORT", "INPUT"
-// and <payload> is any valid json string (including blank).
+// and <metadata> is a set of keys and parameters (of semi-arbitrary type).
 //
 // There is an implementation available that includes extra features like senderJobId,
 // recipientJobId, timestamp, messageId, but we currently lack a valid use case for it
@@ -24,9 +24,9 @@ extern std::string commandList[];
 class Message
 {
    public:
-      // Create a message. We can either supply an entire valid JSON (see above for definition)
-      // or a valid command and payload and InC2 will construct the message automatically
+      // All we need to create a Message is a valid command type, then we can construct the metadata after
       Message(std::string command);
+      Message(json jsonObj);
 
       void addIntParameter(std::string key, int value);
       void addFloatParameter(std::string key, float value);
@@ -46,6 +46,8 @@ class Message
 
       bool _isValidCommand(std::string);
 };
+
+Message stringToMessage(std::string jsonString);
 
 #endif
 
