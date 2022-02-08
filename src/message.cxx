@@ -121,6 +121,13 @@ Message::removeParameter(std::string key)
    this->j["metadata"].erase(key);
 }
 
+// Check to make sure a parameter exists
+bool
+Message::hasParameter(std::string key)
+{
+   return this->j["metadata"].contains(key);
+}
+
 // Return a parameter frm the metadata--we have to give these different names because we can't overload on return values
 int
 Message::getIntParameter(std::string key)

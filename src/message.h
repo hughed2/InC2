@@ -34,6 +34,8 @@ class Message
 
       void removeParameter(std::string key);
 
+      bool hasParameter(std::string key);
+
       int getIntParameter(std::string key);
       float getFloatParameter(std::string key);
       std::string getStringParameter(std::string key);
