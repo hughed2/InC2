@@ -29,11 +29,6 @@ class InC2Comm
       std::vector<int> receiveInts(int rank = 0);
       std::vector<int> receiveIntsFromAll();
 
-      // These are just convenience wrappers to sendMessage
-      void stop();
-      Message report();
-      void input(std::string payload);
-
    private:
       MPI_Comm mpi_comm; // the MPI communicator we wrap around
       int ranks; // The number of processes within the communicator

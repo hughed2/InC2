@@ -2,6 +2,9 @@
 #define MESSAGE_H
 
 #include <string>
+#include "json.hpp"
+
+using nlohmann::json;
 
 extern std::string commandList[];
 
@@ -23,19 +26,26 @@ class Message
    public:
       // Create a message. We can either supply an entire valid JSON (see above for definition)
       // or a valid command and payload and InC2 will construct the message automatically
-      Message(std::string text);
-      Message(std::string command, std::string payload);
+      Message(std::string command);
 
-      std::string getText(); // Returns the entire JSON text
+      void addIntParameter(std::string key, int value);
+      void addFloatParameter(std::string key, float value);
+      void addStringParameter(std::string key, std::string value);
+
+      void removeParameter(std::string key);
+
+      int getIntParameter(std::string key);
+      float getFloatParameter(std::string key);
+      std::string getStringParameter(std::string key);
+
       std::string getCommand(); // Returns the command string
-      std::string getPayload(); // Returns the payload string if available
+      std::string getString(); // Returns a full serialized string version of the json
 
    private:
-      std::string txt;
-      std::string command;
-      std::string payload; // optional depending on command type, JSON
+      json j;
 
-      bool isValidCommand(std::string);
+      bool _isValidCommand(std::string);
 };
 
 #endif
+

@@ -10,6 +10,7 @@ find_package (MPI REQUIRED)
 
 add_library (InC2 STATIC src/message.cxx src/inC2.cxx src/inC2Comm.cxx )
 set_target_properties (InC2 PROPERTIES PUBLIC_HEADER "src/message.h;src/inC2.h;src/inC2Comm.h")
+include_directories("contrib/json")
 target_link_libraries (InC2 PRIVATE MPI::MPI_C)
 
 ### Examples are old style InC2 and need to be updated. After, this block can be uncommented

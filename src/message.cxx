@@ -12,37 +12,23 @@ std::string commandList[] = {
 };
 
 
-// Note: this should really be done as part of a JSON library, but it's easier this way for rapid prototyping and 0 dependencies on first pass
-Message::Message(std::string text)
+// Given a valid command (see above list), initialize our message
+Message::Message(std::string command)
 {
-   this->txt = text;
-   int b_pos = text.find("\"command\"") + 12;
-   int e_pos = text.find("\"", b_pos);
-   this->command = text.substr(b_pos, e_pos-b_pos);
-
-   b_pos = text.find("\"payload\"") + 12;
-   e_pos = text.find("\"", b_pos);
-   this->payload = text.substr(b_pos, e_pos-b_pos);
-
-}
-
-// Given a valid command (see above list) and payload string, turn it into the JSON form of a message object
-Message::Message(std::string command, std::string payload)
-{
-   if(!isValidCommand(command))
+   if(!_isValidCommand(command))
    {
       std::cerr << "Invalid command: " << command << std::endl;
       return;
    }
 
-   // Now actually create and send the message
-   this->txt = std::string("{\n   \"command\": \"") + command + std::string("\",\n") +
-                  std::string("   \"payload\": \"") + payload + std::string("\"\n}");
+   // Set up our basic structure, but don't worry about filling in any parameters yet
+   this->j["command"] = command;
+   this->j["metadata"] = json::object();
 }
 
 // Check to make sure that an input string is in the list of valid commands
 bool
-Message::isValidCommand(std::string command)
+Message::_isValidCommand(std::string command)
 {
    // For now, this is the best way to check to make sure a command is valid
    int i = 0;
@@ -56,24 +42,64 @@ Message::isValidCommand(std::string command)
    return false;
 }
 
-// Get the entire JSON string
-std::string
-Message::getText()
-{
-   return this->txt;
-}
-
 // Get just the command value
 std::string
 Message::getCommand()
 {
-   return this->command;
+   return this->j["command"].get<std::string>();
 }
 
-// Get just the payload value
+// Convert the entire json into a string, so MPI actually knows what to do with it
 std::string
-Message::getPayload()
+Message::getString()
 {
-   return this->payload;
+   return this->j.dump();
 }
 
+// Let us add parameters to the payload. As long as we aren't trying to serialize
+// complex objects, the json library can handle it. So just create a few overloaded
+// methods. Better than forcing the user to worry about templates--maybe later turn
+// this into a macro.
+void
+Message::addIntParameter(std::string key, int value)
+{
+   this->j["metadata"][key] = value;
+}
+
+void
+Message::addFloatParameter(std::string key, float value)
+{
+   this->j["metadata"][key] = value;
+}
+
+void
+Message::addStringParameter(std::string key, std::string value)
+{
+   this->j["metadata"][key] = value;
+}
+
+// Remove a specified parameter from the metadata
+void
+Message::removeParameter(std::string key)
+{
+   this->j["metadata"].erase(key);
+}
+
+// Return a parameter frm the metadata--we have to give these different names because we can't overload on return values
+int
+Message::getIntParameter(std::string key)
+{
+   return this->j["metadata"][key].get<int>();
+}
+
+float
+Message::getFloatParameter(std::string key)
+{
+   return this->j["metadata"][key].get<float>();
+}
+
+std::string
+Message::getStringParameter(std::string key)
+{
+   return this->j["metadata"][key].get<std::string>();
+}

@@ -13,7 +13,7 @@ InC2Comm::InC2Comm(MPI_Comm &communicator)
 void
 InC2Comm::sendMessage(Message msg, int rank)
 {
-   std::string text = msg.getText();
+   std::string text = msg.getString();
    int msgSize = text.size();
    MPI_Send(&msgSize, 1, MPI_INT, rank, 0, this->mpi_comm);
    MPI_Send(text.c_str(), msgSize, MPI_CHAR, rank, 0, this->mpi_comm);
@@ -31,27 +31,6 @@ InC2Comm::checkForMessage(int rank)
    MPI_Recv(msg, msgSize, MPI_CHAR, rank, 0, this->mpi_comm, MPI_STATUS_IGNORE);
    msg[msgSize] = '\0';
    return Message(std::string(msg));
-}
-
-// This is a helper function that just send a blocking STOP message to a child
-void
-InC2Comm::stop()
-{
-   this->sendMessage(Message("STOP", ""));
-}
-
-Message
-InC2Comm::report()
-{
-   this->sendMessage(Message("REPORT", ""));
-   return this->checkForMessage();
-}
-
-// This is a helper function that lets us send new input (in string form) to a child
-void
-InC2Comm::input(std::string payload)
-{
-   this->sendMessage(Message("INPUT", payload));
 }
 
 // This is a wrapper around Isend to simplify the interface.
