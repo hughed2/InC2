@@ -49,7 +49,7 @@ class Message
       bool _isValidCommand(std::string);
 };
 
-Message stringToMessage(std::string jsonString);
+Message* stringToMessage(std::string jsonString);
 
 #endif
 

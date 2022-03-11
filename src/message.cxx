@@ -55,11 +55,11 @@ Message::Message(json jsonObj)
    }
 }
 
-Message
+Message*
 stringToMessage(std::string jsonString)
 {
    json j = json::parse(jsonString);
-   return Message(j);
+   return new Message(j);
 }
 
 // Check to make sure that an input string is in the list of valid commands

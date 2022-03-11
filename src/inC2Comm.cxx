@@ -4,7 +4,7 @@
 // this process and one or more other processes
 InC2Comm::InC2Comm(MPI_Comm &communicator)
 {
-   MPI_Comm_dup(communicator, &(this->mpi_comm)); // This gives us a new context for the communicator, making sure nothing is deleted or changed without our knowledge
+   this->mpi_comm = communicator;
    MPI_Comm_size(this->mpi_comm, &(this->ranks));
 }
 
@@ -35,9 +35,9 @@ InC2Comm::checkForMessage(int rank)
       char* msg = (char *) malloc((1+msgSize) * sizeof(char));
       MPI_Recv(msg, msgSize, MPI_CHAR, rank, 0, this->mpi_comm, MPI_STATUS_IGNORE);
       msg[msgSize] = '\0';
-      retVal = new Message(std::string(msg));
+      retVal = stringToMessage(std::string(msg));
    }
-   return NULL;
+   return retVal;
 }
 
 // This is a wrapper around Isend to simplify the interface.
