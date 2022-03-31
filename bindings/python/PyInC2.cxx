@@ -10,7 +10,7 @@ void message_module(py::module &);
 PYBIND11_MODULE(PyInC2, m)
 {
    py::class_<InC2>(m, "PyInC2")
-       .def(py::init<>())
+       .def(py::init<std::string>(), py::arg("mpi_args") = "")
        .def("spawnChild", &InC2::spawnChild)
        .def("getParent", &InC2::getParent)
    ;

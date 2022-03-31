@@ -12,7 +12,7 @@
 class InC2
 {
    public:
-      InC2();
+      InC2(std::string mpi_args = std::string());
       ~InC2();
 
       InC2Comm* spawnChild(std::string command, int procs = 1); // Use MPI to spawn a child program, and then return an InC2Comm pointing at it
