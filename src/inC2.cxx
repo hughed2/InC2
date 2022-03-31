@@ -67,7 +67,7 @@ InC2::spawnChild(std::string command, int procs)
    argv[n] = NULL; // MPI's list of args is null terminated
 
    MPI_Comm child_comm;
-   MPI_Comm_spawn(cmd_c, argv, procs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &child_comm, MPI_ERRCODES_IGNORE);
+   MPI_Comm_spawn(exe, argv, procs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &child_comm, MPI_ERRCODES_IGNORE);
 
    free(argv);
    free(cmd_c);
