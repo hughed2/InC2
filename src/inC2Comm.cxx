@@ -1,11 +1,15 @@
 #include "inC2Comm.h"
 
+#include <iostream>
+
 // Create a communicator that can pass data back and forth between
 // this process and one or more other processes
-InC2Comm::InC2Comm(MPI_Comm &communicator)
+InC2Comm::InC2Comm(MPI_Comm &communicator, int procs)
 {
    this->mpi_comm = communicator;
-   MPI_Comm_size(this->mpi_comm, &(this->ranks));
+   // this always returns 1 for some reason...
+   //MPI_Comm_size(this->mpi_comm, &(this->ranks));
+   this->ranks = procs;
 }
 
 // Send a Message object to a process of a given rank
@@ -121,7 +125,7 @@ InC2Comm::_getData(void* data, int size, MPI_Datatype datatype, int rank)
 {
    MPI_Request req;
    MPI_Irecv(data, size, datatype, rank, 0, this->mpi_comm, &req);
-   MPI_Wait(&req, MPI_STATUS_IGNORE);
+   this->error_code = MPI_Wait(&req, MPI_STATUS_IGNORE);
 }
 
 // Get a vector of doubles from a single rank of the child.
@@ -206,5 +210,23 @@ InC2Comm::receiveIntsFromAll()
    // We just have a standard array, so wrap it in a vector
    std::vector<int> data_vec(data, data+totalSize);
    return data_vec;
+}
+
+// Check the status of our MPI calls. Return True/non-zero if there has been an error, or False/0 otherwise
+// Optionally, we can print the MPI string associated with the error, so the user doesn't need
+// to know how to check the value of the error code
+int
+InC2Comm::checkError(bool display_error)
+{
+   int error_class;
+   MPI_Error_class(this->error_code, &error_class); // The error code is very implementation specific and hard to use, but we can convert it to a more general error CLASS
+   if(error_code && display_error)
+   {
+      int result_len;
+      char error_string[MPI_MAX_ERROR_STRING];
+      MPI_Error_string(error_class, error_string, &result_len);
+      std::cout << error_string << std::endl;
+   }
+   return error_class;
 }
 

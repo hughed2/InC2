@@ -10,7 +10,7 @@ class InC2Comm
 {
    public:
       // Create an InC2 wrapper around an MPI communicator
-      InC2Comm(MPI_Comm &communicator);
+      InC2Comm(MPI_Comm &communicator, int procs);
 
       // Send or receive a Message object from a process
       void sendMessage(Message msg, int rank = 0);
@@ -29,8 +29,13 @@ class InC2Comm
       std::vector<int> receiveInts(int rank = 0);
       std::vector<int> receiveIntsFromAll();
 
+      int checkError(bool display_error = true);
+
+      int getNumProcs() {return this->ranks;};
+
    private:
       MPI_Comm mpi_comm; // the MPI communicator we wrap around
+      int error_code; // Helps us figure out errors on recv
       int ranks; // The number of processes within the communicator
 
       // Helper functions so we can do an MPI_Irecv under the hood

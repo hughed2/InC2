@@ -72,7 +72,7 @@ InC2::spawnChild(std::string command, int procs)
    free(argv);
    free(cmd_c);
 
-   return new InC2Comm(child_comm);
+   return new InC2Comm(child_comm, procs);
 }
 
 // This communicator will only speak with the job's parent.
@@ -84,5 +84,5 @@ InC2::getParent()
    MPI_Comm parent_comm;
    MPI_Comm_get_parent(&parent_comm);
 
-   return new InC2Comm(parent_comm);
+   return new InC2Comm(parent_comm, 1);
 }
