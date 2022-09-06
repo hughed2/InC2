@@ -212,6 +212,17 @@ InC2Comm::receiveIntsFromAll()
    return data_vec;
 }
 
+void
+InC2Comm::stop()
+{
+
+   Message msg(std::string("STOP"));
+   for (int rank = 0; rank < this->ranks; rank++)
+   {
+      this->sendMessage(msg, rank);
+   }
+}
+
 // Check the status of our MPI calls. Return True/non-zero if there has been an error, or False/0 otherwise
 // Optionally, we can print the MPI string associated with the error, so the user doesn't need
 // to know how to check the value of the error code

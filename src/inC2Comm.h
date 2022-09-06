@@ -29,6 +29,9 @@ class InC2Comm
       std::vector<int> receiveInts(int rank = 0);
       std::vector<int> receiveIntsFromAll();
 
+      // Helper functions
+      void stop();
+
       int checkError(bool display_error = true);
 
       int getNumProcs() {return this->ranks;};

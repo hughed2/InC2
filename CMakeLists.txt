@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # sets -fPIC command line options for gcc
 
-find_package (MPI REQUIRED)
+find_package (MPI REQUIRED COMPONENTS C)
 
 add_library (InC2 STATIC src/message.cxx src/inC2.cxx src/inC2Comm.cxx )
 set_target_properties (InC2 PROPERTIES PUBLIC_HEADER "src/message.h;src/inC2.h;src/inC2Comm.h;contrib/json/json.hpp")

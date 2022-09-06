@@ -19,6 +19,7 @@ void inC2Comm_module(py::module &m)
        .def("receiveDoublesFromAll", &InC2Comm::receiveDoublesFromAll)
        .def("receiveInts", &InC2Comm::receiveInts)
        .def("receiveIntsFromAll", &InC2Comm::receiveIntsFromAll)
+       .def("stop", &InC2Comm::stop)
        .def("checkError", &InC2Comm::checkError)
        .def("getNumProcs", &InC2Comm::getNumProcs)
    ;

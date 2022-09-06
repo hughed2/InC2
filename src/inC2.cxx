@@ -4,6 +4,8 @@
 #include <cstring>
 #include <mpi.h>
 
+#include <iostream>
+
 InC2::InC2(std::string mpi_args)
 {
    // Because we use MPI, we need to have an MPI_Init() ahead of time
@@ -52,7 +54,7 @@ InC2::~InC2()
 // a job "hoMusic proj.in" on the command line, but I want it to have 20 procs, I could run
 // ChildProg("hoMusic proj.in", 20)
 InC2Comm* 
-InC2::spawnChild(std::string command, int procs)
+InC2::spawnChild(std::string command, int procs, std::string hostfile)
 {
    // MPI is a C lib, so we need to convert our C++ string
    size_t n = std::count(command.begin(), command.end(), ' ');
@@ -66,8 +68,15 @@ InC2::spawnChild(std::string command, int procs)
    }
    argv[n] = NULL; // MPI's list of args is null terminated
 
+   // If a hostfile is provided, we need to add it to our MPI_INFO object
+   MPI_Info mpi_info;
+   MPI_Info_create(&mpi_info);
+   if (!hostfile.empty()) {
+      MPI_Info_set(mpi_info, "hostfile", hostfile.c_str());
+   }
+
    MPI_Comm child_comm;
-   MPI_Comm_spawn(exe, argv, procs, MPI_INFO_NULL, 0, MPI_COMM_WORLD, &child_comm, MPI_ERRCODES_IGNORE);
+   MPI_Comm_spawn(exe, argv, procs, mpi_info, 0, MPI_COMM_SELF, &child_comm, MPI_ERRCODES_IGNORE);
 
    free(argv);
    free(cmd_c);
